@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SplitStyle – 一张图，两种风格，一个故事</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --border: #2a2a2a;
+    --accent: #6366f1;
+    --accent-hover: #818cf8;
+    --text: #e5e5e5;
+    --text-dim: #888;
+    --radius: 12px;
+    --color-a: #6366f1;
+    --color-b: #f472b6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    text-align: center;
+    padding: 48px 20px 32px;
+  }
+  header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #6366f1, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  header p { color: var(--text-dim); font-size: 1.1rem; font-style: italic; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px 60px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+  .card h2 {
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+  }
+
+  /* Upload */
+  .upload-area {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 48px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .upload-area:hover, .upload-area.dragover {
+    border-color: var(--accent);
+    background: rgba(99, 102, 241, 0.05);
+  }
+  .upload-area .icon { font-size: 3rem; margin-bottom: 12px; }
+  .upload-area .label { font-size: 1.1rem; }
+  .upload-area .hint { font-size: 0.85rem; color: var(--text-dim); margin-top: 8px; }
+  .upload-area input { display: none; }
+
+  /* Crop Section */
+  .crop-section { display: none; }
+  .crop-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .crop-col { text-align: center; }
+  .crop-label {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .label-a { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+  .label-b { background: rgba(244, 114, 182, 0.2); color: #f472b6; }
+
+  .crop-frame {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    cursor: grab;
+    touch-action: none;
+    background: #000;
+  }
+  .crop-frame:active { cursor: grabbing; }
+  .crop-frame img {
+    position: absolute;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .crop-hint {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+
+  /* Zoom */
+  .zoom-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .zoom-row label { font-size: 0.8rem; color: var(--text-dim); }
+  .zoom-row input[type=range] {
+    width: 140px;
+    accent-color: var(--accent);
+  }
+
+  /* Style Controls */
+  .style-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .style-col label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .style-col select {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+  .style-col select:focus { outline: none; border-color: var(--accent); }
+  .style-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .tag-a { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+  .tag-b { background: rgba(244, 114, 182, 0.2); color: #f472b6; }
+
+  .generate-btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #6366f1, #a78bfa);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 24px;
+  }
+  .generate-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .generate-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* Results */
+  .results { display: none; }
+  .split-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .split-item { text-align: center; }
+  .split-item canvas {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .split-item .split-label {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .combined { text-align: center; }
+  .combined canvas {
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .compare-container {
+    position: relative;
+    display: inline-block;
+    cursor: ew-resize;
+    user-select: none;
+    max-width: 100%;
+  }
+  .compare-container canvas { display: block; max-width: 100%; border-radius: 8px; }
+  .compare-slider {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 3px;
+    background: white;
+    box-shadow: 0 0 8px rgba(0,0,0,0.5);
+    pointer-events: none;
+  }
+  .compare-handle {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 36px; height: 36px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #333;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    pointer-events: none;
+  }
+  .download-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .dl-btn {
+    padding: 10px 20px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .dl-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.8rem; }
+    .style-row, .crop-row, .split-row { grid-template-columns: 1fr; }
+    .card { padding: 20px; }
+    .upload-area { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>✦ SplitStyle</h1>
+  <p>一张图，两种风格，一个故事</p>
+</header>
+
+<div class="container">
+  <!-- Upload -->
+  <div class="card">
+    <h2>📤 上传图片</h2>
+    <div class="upload-area" id="uploadArea">
+      <div class="icon">🖼️</div>
+      <div class="label">点击或拖拽图片到这里</div>
+      <div class="hint">支持 JPG、PNG、WEBP 格式 · 最大 20MB</div>
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp">
+    </div>
+  </div>
+
+  <!-- Crop -->
+  <div class="crop-section" id="cropSection">
+    <div class="card">
+      <h2>✂️ 裁切定位 · 拖动图片调整构图</h2>
+      <div class="crop-row">
+        <div class="crop-col">
+          <div class="crop-label label-a">A · 左图</div>
+          <div class="crop-frame" id="frameA"></div>
+          <div class="crop-hint">拖动图片调整位置</div>
+          <div class="zoom-row">
+            <label>缩放</label>
+            <input type="range" id="zoomA" min="0.2" max="3" step="0.05" value="1">
+            <span id="zoomAVal">100%</span>
+          </div>
+        </div>
+        <div class="crop-col">
+          <div class="crop-label label-b">B · 右图</div>
+          <div class="crop-frame" id="frameB"></div>
+          <div class="crop-hint">拖动图片调整位置</div>
+          <div class="zoom-row">
+            <label>缩放</label>
+            <input type="range" id="zoomB" min="0.2" max="3" step="0.05" value="1">
+            <span id="zoomBVal">100%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Style -->
+    <div class="card">
+      <h2>🎨 风格设置</h2>
+      <div class="style-row">
+        <div class="style-col">
+          <span class="style-tag tag-a">A · 左图</span>
+          <label>左图风格</label>
+          <select id="styleA">
+            <option value="none">原图（无滤镜）</option>
+            <option value="grayscale(100%)">黑白</option>
+            <option value="sepia(100%)">复古棕褐</option>
+            <option value="contrast(150%)">高对比度</option>
+            <option value="brightness(130%)">明亮</option>
+            <option value="saturate(200%)">高饱和</option>
+            <option value="hue-rotate(90deg)">色相偏移 90°</option>
+            <option value="hue-rotate(180deg)">色相偏移 180°</option>
+            <option value="hue-rotate(270deg)">色相偏移 270°</option>
+            <option value="invert(100%)">反色</option>
+            <option value="blur(3px)">模糊</option>
+            <option value="contrast(200%) grayscale(100%)">黑色电影</option>
+            <option value="saturate(300%) contrast(120%)">鲜艳夺目</option>
+            <option value="sepia(80%) saturate(150%) hue-rotate(330deg)">暖调复古</option>
+            <option value="brightness(110%) contrast(90%) saturate(80%) sepia(20%)">褪色胶片</option>
+            <option value="contrast(120%) brightness(110%) hue-rotate(200deg)">赛博朋克</option>
+          </select>
+        </div>
+        <div class="style-col">
+          <span class="style-tag tag-b">B · 右图</span>
+          <label>右图风格</label>
+          <select id="styleB">
+            <option value="none">原图（无滤镜）</option>
+            <option value="grayscale(100%)" selected>黑白</option>
+            <option value="sepia(100%)">复古棕褐</option>
+            <option value="contrast(150%)">高对比度</option>
+            <option value="brightness(130%)">明亮</option>
+            <option value="saturate(200%)">高饱和</option>
+            <option value="hue-rotate(90deg)">色相偏移 90°</option>
+            <option value="hue-rotate(180deg)">色相偏移 180°</option>
+            <option value="hue-rotate(270deg)">色相偏移 270°</option>
+            <option value="invert(100%)">反色</option>
+            <option value="blur(3px)">模糊</option>
+            <option value="contrast(200%) grayscale(100%)">黑色电影</option>
+            <option value="saturate(300%) contrast(120%)">鲜艳夺目</option>
+            <option value="sepia(80%) saturate(150%) hue-rotate(330deg)">暖调复古</option>
+            <option value="brightness(110%) contrast(90%) saturate(80%) sepia(20%)">褪色胶片</option>
+            <option value="contrast(120%) brightness(110%) hue-rotate(200deg)">赛博朋克</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <button class="generate-btn" id="generateBtn">✦ 生成拼接图片</button>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+    <div class="card">
+      <h2>🖼️ 生成结果</h2>
+      <div class="split-row">
+        <div class="split-item">
+          <canvas id="canvasA"></canvas>
+          <div class="split-label">A · 左图</div>
+        </div>
+        <div class="split-item">
+          <canvas id="canvasB"></canvas>
+          <div class="split-label">B · 右图</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>🔗 拼接预览</h2>
+      <div class="combined">
+        <div class="compare-container" id="compareContainer">
+          <canvas id="canvasCombined"></canvas>
+          <div class="compare-slider" id="compareSlider">
+            <div class="compare-handle">⇔</div>
+          </div>
+        </div>
+      </div>
+      <div class="download-row">
+        <button class="dl-btn" onclick="download('A')">⬇ 下载左图</button>
+        <button class="dl-btn" onclick="download('B')">⬇ 下载右图</button>
+        <button class="dl-btn" onclick="download('Combined')">⬇ 下载拼接图</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- Config ----
+const RATIO = 3 / 4; // width / height
+const FRAME_DISPLAY_H = 400; // px display height of crop frame
+const FRAME_DISPLAY_W = FRAME_DISPLAY_H * RATIO;
+const OUTPUT_H = 2000; // output pixel height
+const OUTPUT_W = OUTPUT_H * RATIO; // 1500
+
+// ---- State ----
+let loadedImage = null;
+const cropState = {
+  A: { x: 0, y: 0, zoom: 1 },
+  B: { x: 0, y: 0, zoom: 1 }
+};
+
+// ---- Upload ----
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+uploadArea.addEventListener('click', () => fileInput.click());
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadArea.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+function handleFile(file) {
+  if (file.size > 20 * 1024 * 1024) { alert('文件太大，最大支持 20MB'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      loadedImage = img;
+      uploadArea.querySelector('.label').textContent = '✅ ' + file.name;
+      initCropFrames();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ---- Crop Frames ----
+function initCropFrames() {
+  document.getElementById('cropSection').style.display = 'block';
+  setupFrame('A');
+  setupFrame('B');
+  // Reset zoom sliders
+  document.getElementById('zoomA').value = 1;
+  document.getElementById('zoomB').value = 1;
+  document.getElementById('zoomAVal').textContent = '100%';
+  document.getElementById('zoomBVal').textContent = '100%';
+  document.getElementById('cropSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function setupFrame(side) {
+  const frame = document.getElementById('frame' + side);
+  frame.innerHTML = '';
+  frame.style.width = FRAME_DISPLAY_W + 'px';
+  frame.style.height = FRAME_DISPLAY_H + 'px';
+  frame.style.margin = '0 auto';
+  frame.style.border = side === 'A' ? '2px solid var(--color-a)' : '2px solid var(--color-b)';
+
+  const imgEl = document.createElement('img');
+  imgEl.src = loadedImage.src;
+
+  // Fit image: scale so it covers the frame initially
+  const imgW = loadedImage.naturalWidth;
+  const imgH = loadedImage.naturalHeight;
+  const scaleToFit = Math.max(FRAME_DISPLAY_W / imgW, FRAME_DISPLAY_H / imgH);
+
+  const state = cropState[side];
+  state.zoom = 1;
+  state.baseScale = scaleToFit;
+  state.x = (FRAME_DISPLAY_W - imgW * scaleToFit) / 2;
+  state.y = (FRAME_DISPLAY_H - imgH * scaleToFit) / 2;
+
+  applyTransform(imgEl, state);
+  frame.appendChild(imgEl);
+
+  // Drag
+  let dragging = false, startX, startY, startPosX, startPosY;
+
+  const onDown = (cx, cy) => {
+    dragging = true;
+    startX = cx;
+    startY = cy;
+    startPosX = state.x;
+    startPosY = state.y;
+  };
+  const onMove = (cx, cy) => {
+    if (!dragging) return;
+    state.x = startPosX + (cx - startX);
+    state.y = startPosY + (cy - startY);
+    applyTransform(imgEl, state);
+  };
+  const onUp = () => { dragging = false; };
+
+  frame.addEventListener('mousedown', e => { e.preventDefault(); onDown(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', e => { if (dragging) onMove(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', onUp);
+  frame.addEventListener('touchstart', e => { e.preventDefault(); onDown(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+  window.addEventListener('touchmove', e => { if (dragging) onMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+  window.addEventListener('touchend', onUp);
+
+  // Mouse wheel zoom
+  frame.addEventListener('wheel', e => {
+    e.preventDefault();
+    const slider = document.getElementById('zoom' + side);
+    let newZoom = state.zoom + (e.deltaY < 0 ? 0.1 : -0.1);
+    newZoom = Math.max(0.2, Math.min(3, newZoom));
+    state.zoom = newZoom;
+    slider.value = newZoom;
+    document.getElementById('zoom' + side + 'Val').textContent = Math.round(newZoom * 100) + '%';
+    applyTransform(imgEl, state);
+  }, { passive: false });
+
+  // Zoom slider
+  const slider = document.getElementById('zoom' + side);
+  slider.addEventListener('input', () => {
+    state.zoom = parseFloat(slider.value);
+    document.getElementById('zoom' + side + 'Val').textContent = Math.round(state.zoom * 100) + '%';
+    applyTransform(imgEl, state);
+  });
+}
+
+function applyTransform(imgEl, state) {
+  const s = state.baseScale * state.zoom;
+  const w = loadedImage.naturalWidth * s;
+  const h = loadedImage.naturalHeight * s;
+  imgEl.style.width = w + 'px';
+  imgEl.style.height = h + 'px';
+  imgEl.style.left = state.x + 'px';
+  imgEl.style.top = state.y + 'px';
+}
+
+// ---- Generate ----
+document.getElementById('generateBtn').addEventListener('click', generate);
+
+function generate() {
+  if (!loadedImage) return;
+  const img = loadedImage;
+  const styleA = document.getElementById('styleA').value;
+  const styleB = document.getElementById('styleB').value;
+
+  renderCrop('A', styleA, document.getElementById('canvasA'));
+  renderCrop('B', styleB, document.getElementById('canvasB'));
+
+  // Combined: A left + B right
+  const cC = document.getElementById('canvasCombined');
+  cC.width = OUTPUT_W * 2;
+  cC.height = OUTPUT_H;
+  const ctxC = cC.getContext('2d');
+  ctxC.drawImage(document.getElementById('canvasA'), 0, 0);
+  ctxC.drawImage(document.getElementById('canvasB'), OUTPUT_W, 0);
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+  initCompareSlider();
+}
+
+function renderCrop(side, style, canvas) {
+  const state = cropState[side];
+  const img = loadedImage;
+
+  // Map display coords to source image coords
+  const displayScale = state.baseScale * state.zoom;
+  // In display: image pixel (ix, iy) appears at (state.x + ix * displayScale, state.y + iy * displayScale)
+  // The frame shows [0, FRAME_DISPLAY_W] x [0, FRAME_DISPLAY_H]
+  // So source x for frame left edge: (0 - state.x) / displayScale
+  const srcX = (0 - state.x) / displayScale;
+  const srcY = (0 - state.y) / displayScale;
+  const srcW = FRAME_DISPLAY_W / displayScale;
+  const srcH = FRAME_DISPLAY_H / displayScale;
+
+  canvas.width = OUTPUT_W;
+  canvas.height = OUTPUT_H;
+  const ctx = canvas.getContext('2d');
+  if (style !== 'none') ctx.filter = style;
+  ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, OUTPUT_W, OUTPUT_H);
+}
+
+// ---- Compare Slider ----
+function initCompareSlider() {
+  const container = document.getElementById('compareContainer');
+  const slider = document.getElementById('compareSlider');
+  const canvas = document.getElementById('canvasCombined');
+  let dragging = false;
+
+  function setPos(x) {
+    const rect = container.getBoundingClientRect();
+    let ratio = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
+    slider.style.left = (ratio * 100) + '%';
+  }
+
+  container.addEventListener('mousedown', e => { dragging = true; setPos(e.clientX); });
+  window.addEventListener('mousemove', e => { if (dragging) setPos(e.clientX); });
+  window.addEventListener('mouseup', () => dragging = false);
+  container.addEventListener('touchstart', e => { dragging = true; setPos(e.touches[0].clientX); }, { passive: true });
+  window.addEventListener('touchmove', e => { if (dragging) setPos(e.touches[0].clientX); }, { passive: true });
+  window.addEventListener('touchend', () => dragging = false);
+
+  setTimeout(() => {
+    const rect = container.getBoundingClientRect();
+    setPos(rect.left + rect.width / 2);
+  }, 100);
+}
+
+// ---- Download ----
+function download(type) {
+  let canvas;
+  if (type === 'A') canvas = document.getElementById('canvasA');
+  else if (type === 'B') canvas = document.getElementById('canvasB');
+  else canvas = document.getElementById('canvasCombined');
+  const link = document.createElement('a');
+  link.download = 'splitstyle-' + type.toLowerCase() + '.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+</script>
+</body>
+</html>
