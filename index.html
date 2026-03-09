@@ -6,273 +6,76 @@
 <title>SplitStyle – 一张图，两种风格，一个故事</title>
 <style>
   :root {
-    --bg: #0a0a0a;
-    --surface: #141414;
-    --border: #2a2a2a;
-    --accent: #6366f1;
-    --accent-hover: #818cf8;
-    --text: #e5e5e5;
-    --text-dim: #888;
-    --radius: 12px;
-    --color-a: #6366f1;
-    --color-b: #f472b6;
+    --bg: #0a0a0a; --surface: #141414; --border: #2a2a2a;
+    --accent: #6366f1; --text: #e5e5e5; --text-dim: #888; --radius: 12px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
-  header {
-    text-align: center;
-    padding: 48px 20px 32px;
-  }
-  header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #6366f1, #a78bfa, #f472b6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 8px;
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  header { text-align: center; padding: 48px 20px 32px; }
+  header h1 { font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #6366f1, #a78bfa, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
   header p { color: var(--text-dim); font-size: 1.1rem; font-style: italic; }
   .container { max-width: 1100px; margin: 0 auto; padding: 0 20px 60px; }
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 32px;
-    margin-bottom: 24px;
-  }
-  .card h2 {
-    font-weight: 600;
-    margin-bottom: 20px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 0.85rem;
-  }
-
-  /* Upload */
-  .upload-area {
-    border: 2px dashed var(--border);
-    border-radius: var(--radius);
-    padding: 48px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-  .upload-area:hover, .upload-area.dragover {
-    border-color: var(--accent);
-    background: rgba(99, 102, 241, 0.05);
-  }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; margin-bottom: 24px; }
+  .card h2 { font-weight: 600; margin-bottom: 20px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; }
+  .upload-area { border: 2px dashed var(--border); border-radius: var(--radius); padding: 48px; text-align: center; cursor: pointer; transition: all 0.3s; }
+  .upload-area:hover, .upload-area.dragover { border-color: var(--accent); background: rgba(99,102,241,0.05); }
   .upload-area .icon { font-size: 3rem; margin-bottom: 12px; }
   .upload-area .label { font-size: 1.1rem; }
   .upload-area .hint { font-size: 0.85rem; color: var(--text-dim); margin-top: 8px; }
   .upload-area input { display: none; }
-
-  /* Crop Section */
+  .settings-row { display: flex; gap: 24px; align-items: end; flex-wrap: wrap; }
+  .setting-group { flex: 1; min-width: 150px; }
+  .setting-group label { display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 6px; }
+  .setting-group input { width: 100%; padding: 10px 14px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; }
+  .setting-group input:focus { outline: none; border-color: var(--accent); }
+  .settings-info { margin-top: 16px; padding: 12px 16px; background: rgba(99,102,241,0.08); border-radius: 8px; font-size: 0.85rem; color: #a5b4fc; line-height: 1.6; }
+  .settings-info code { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; }
   .crop-section { display: none; }
-  .crop-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
-  .crop-col { text-align: center; }
-  .crop-label {
-    display: inline-block;
-    padding: 4px 14px;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-  .label-a { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
-  .label-b { background: rgba(244, 114, 182, 0.2); color: #f472b6; }
-
-  .crop-frame {
-    position: relative;
-    overflow: hidden;
-    border-radius: 8px;
-    border: 2px solid var(--border);
-    cursor: grab;
-    touch-action: none;
-    background: #000;
-  }
+  .crop-frame { position: relative; overflow: hidden; border-radius: 8px; border: 2px solid var(--border); cursor: grab; touch-action: none; background: #000; }
   .crop-frame:active { cursor: grabbing; }
-  .crop-frame img {
-    position: absolute;
-    user-select: none;
-    -webkit-user-drag: none;
-  }
-  .crop-hint {
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    margin-top: 8px;
-  }
-
-  /* Zoom */
-  .zoom-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
-  }
+  .crop-frame img { position: absolute; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+  .crop-hint { font-size: 0.8rem; color: var(--text-dim); margin-top: 8px; }
+  .gap-indicator { position: absolute; top: 0; bottom: 0; background: rgba(255,60,60,0.15); border-left: 2px dashed rgba(255,100,100,0.5); border-right: 2px dashed rgba(255,100,100,0.5); pointer-events: none; z-index: 10; display: flex; align-items: center; justify-content: center; }
+  .gap-indicator span { writing-mode: vertical-lr; font-size: 0.7rem; color: rgba(255,150,150,0.7); letter-spacing: 2px; }
+  .zoom-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
   .zoom-row label { font-size: 0.8rem; color: var(--text-dim); }
-  .zoom-row input[type=range] {
-    width: 140px;
-    accent-color: var(--accent);
-  }
-
-  /* Style Controls */
-  .style-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
-  .style-col label {
-    display: block;
-    font-size: 0.9rem;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-  }
-  .style-col select {
-    width: 100%;
-    padding: 12px 16px;
-    background: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-  }
+  .zoom-row input[type=range] { width: 160px; accent-color: var(--accent); }
+  .style-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .style-col label { display: block; font-size: 0.9rem; color: var(--text-dim); margin-bottom: 8px; }
+  .style-col select { width: 100%; padding: 12px 16px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
   .style-col select:focus { outline: none; border-color: var(--accent); }
-  .style-tag {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-  .tag-a { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
-  .tag-b { background: rgba(244, 114, 182, 0.2); color: #f472b6; }
-
-  .generate-btn {
-    display: block;
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, #6366f1, #a78bfa);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-bottom: 24px;
-  }
+  .style-tag { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-bottom: 8px; }
+  .tag-a { background: rgba(99,102,241,0.2); color: #818cf8; }
+  .tag-b { background: rgba(244,114,182,0.2); color: #f472b6; }
+  .generate-btn { display: block; width: 100%; padding: 16px; background: linear-gradient(135deg, #6366f1, #a78bfa); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-bottom: 24px; }
   .generate-btn:hover { opacity: 0.9; transform: translateY(-1px); }
   .generate-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-  /* Results */
   .results { display: none; }
-  .split-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 24px;
-  }
+  .split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
   .split-item { text-align: center; }
-  .split-item canvas {
-    width: 100%;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-  }
-  .split-item .split-label {
-    margin-top: 8px;
-    font-size: 0.85rem;
-    color: var(--text-dim);
-  }
+  .split-item canvas { width: 100%; border-radius: 8px; border: 1px solid var(--border); }
+  .split-item .split-label { margin-top: 8px; font-size: 0.85rem; color: var(--text-dim); }
+  .device-preview { text-align: center; }
+  .device-frame { display: inline-flex; align-items: stretch; background: #1a1a1a; padding: 14px; border-radius: 14px; box-shadow: 0 4px 24px rgba(0,0,0,0.5); }
+  .device-screen { border-radius: 4px; overflow: hidden; background: #000; }
+  .device-screen canvas { display: block; height: 100%; }
+  .device-gap { flex-shrink: 0; background: #1a1a1a; }
+  .device-label { margin-top: 12px; font-size: 0.8rem; color: var(--text-dim); }
   .combined { text-align: center; }
-  .combined canvas {
-    max-width: 100%;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-  }
-  .compare-container {
-    position: relative;
-    display: inline-block;
-    cursor: ew-resize;
-    user-select: none;
-    max-width: 100%;
-  }
-  .compare-container canvas { display: block; max-width: 100%; border-radius: 8px; }
-  .compare-slider {
-    position: absolute;
-    top: 0; bottom: 0;
-    width: 3px;
-    background: white;
-    box-shadow: 0 0 8px rgba(0,0,0,0.5);
-    pointer-events: none;
-  }
-  .compare-handle {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 36px; height: 36px;
-    background: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    color: #333;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    pointer-events: none;
-  }
-  .download-row {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 20px;
-    flex-wrap: wrap;
-  }
-  .dl-btn {
-    padding: 10px 20px;
-    background: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s;
-  }
+  .combined canvas { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); }
+  .download-row { display: flex; gap: 12px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+  .dl-btn { padding: 10px 20px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
   .dl-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-  @media (max-width: 600px) {
-    header h1 { font-size: 1.8rem; }
-    .style-row, .crop-row, .split-row { grid-template-columns: 1fr; }
-    .card { padding: 20px; }
-    .upload-area { padding: 32px 20px; }
-  }
+  @media (max-width: 600px) { header h1 { font-size: 1.8rem; } .style-row, .split-row { grid-template-columns: 1fr; } .card { padding: 20px; } .upload-area { padding: 32px 20px; } .settings-row { flex-direction: column; } }
 </style>
 </head>
 <body>
-
 <header>
   <h1>✦ SplitStyle</h1>
   <p>一张图，两种风格，一个故事</p>
 </header>
-
 <div class="container">
-  <!-- Upload -->
+
   <div class="card">
     <h2>📤 上传图片</h2>
     <div class="upload-area" id="uploadArea">
@@ -283,80 +86,44 @@
     </div>
   </div>
 
-  <!-- Crop -->
+  <div class="card">
+    <h2>📐 设备参数 · 中缝补偿</h2>
+    <div class="settings-row">
+      <div class="setting-group"><label>屏幕宽度 (cm)</label><input type="number" id="screenWidth" value="12" step="0.1" min="1"></div>
+      <div class="setting-group"><label>屏幕高度 (cm)</label><input type="number" id="screenHeight" value="18.5" step="0.1" min="1"></div>
+      <div class="setting-group"><label>中缝间隙 (cm)</label><input type="number" id="gapSize" value="1.2" step="0.1" min="0"></div>
+    </div>
+    <div class="settings-info" id="settingsInfo"></div>
+  </div>
+
   <div class="crop-section" id="cropSection">
     <div class="card">
       <h2>✂️ 裁切定位 · 拖动图片调整构图</h2>
-      <div class="crop-row">
-        <div class="crop-col">
-          <div class="crop-label label-a">A · 左图</div>
-          <div class="crop-frame" id="frameA"></div>
-          <div class="crop-hint">拖动图片调整位置</div>
-          <div class="zoom-row">
-            <label>缩放</label>
-            <input type="range" id="zoomA" min="0.2" max="3" step="0.05" value="1">
-            <span id="zoomAVal">100%</span>
-          </div>
-        </div>
-        <div class="crop-col">
-          <div class="crop-label label-b">B · 右图</div>
-          <div class="crop-frame" id="frameB"></div>
-          <div class="crop-hint">拖动图片调整位置</div>
-          <div class="zoom-row">
-            <label>缩放</label>
-            <input type="range" id="zoomB" min="0.2" max="3" step="0.05" value="1">
-            <span id="zoomBVal">100%</span>
-          </div>
+      <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:16px;">红色虚线区域 = 中缝补偿区（该部分将被删除，避免主体被物理间隙遮挡）</p>
+      <div style="text-align:center;">
+        <div class="crop-frame" id="cropFrame" style="display:inline-block;"></div>
+        <div class="crop-hint">拖动图片调整位置 · 滚轮缩放</div>
+        <div class="zoom-row">
+          <label>缩放</label>
+          <input type="range" id="zoomSlider" min="0.2" max="3" step="0.05" value="1">
+          <span id="zoomVal">100%</span>
         </div>
       </div>
     </div>
 
-    <!-- Style -->
     <div class="card">
       <h2>🎨 风格设置</h2>
       <div class="style-row">
         <div class="style-col">
-          <span class="style-tag tag-a">A · 左图</span>
-          <label>左图风格</label>
+          <span class="style-tag tag-a">A · 左屏</span><label>左屏风格</label>
           <select id="styleA">
-            <option value="none">原图（无滤镜）</option>
-            <option value="grayscale(100%)">黑白</option>
-            <option value="sepia(100%)">复古棕褐</option>
-            <option value="contrast(150%)">高对比度</option>
-            <option value="brightness(130%)">明亮</option>
-            <option value="saturate(200%)">高饱和</option>
-            <option value="hue-rotate(90deg)">色相偏移 90°</option>
-            <option value="hue-rotate(180deg)">色相偏移 180°</option>
-            <option value="hue-rotate(270deg)">色相偏移 270°</option>
-            <option value="invert(100%)">反色</option>
-            <option value="blur(3px)">模糊</option>
-            <option value="contrast(200%) grayscale(100%)">黑色电影</option>
-            <option value="saturate(300%) contrast(120%)">鲜艳夺目</option>
-            <option value="sepia(80%) saturate(150%) hue-rotate(330deg)">暖调复古</option>
-            <option value="brightness(110%) contrast(90%) saturate(80%) sepia(20%)">褪色胶片</option>
-            <option value="contrast(120%) brightness(110%) hue-rotate(200deg)">赛博朋克</option>
+            <option value="none">原图（无滤镜）</option><option value="grayscale(100%)">黑白</option><option value="sepia(100%)">复古棕褐</option><option value="contrast(150%)">高对比度</option><option value="brightness(130%)">明亮</option><option value="saturate(200%)">高饱和</option><option value="hue-rotate(90deg)">色相偏移 90°</option><option value="hue-rotate(180deg)">色相偏移 180°</option><option value="hue-rotate(270deg)">色相偏移 270°</option><option value="invert(100%)">反色</option><option value="blur(3px)">模糊</option><option value="contrast(200%) grayscale(100%)">黑色电影</option><option value="saturate(300%) contrast(120%)">鲜艳夺目</option><option value="sepia(80%) saturate(150%) hue-rotate(330deg)">暖调复古</option><option value="brightness(110%) contrast(90%) saturate(80%) sepia(20%)">褪色胶片</option><option value="contrast(120%) brightness(110%) hue-rotate(200deg)">赛博朋克</option>
           </select>
         </div>
         <div class="style-col">
-          <span class="style-tag tag-b">B · 右图</span>
-          <label>右图风格</label>
+          <span class="style-tag tag-b">B · 右屏</span><label>右屏风格</label>
           <select id="styleB">
-            <option value="none">原图（无滤镜）</option>
-            <option value="grayscale(100%)" selected>黑白</option>
-            <option value="sepia(100%)">复古棕褐</option>
-            <option value="contrast(150%)">高对比度</option>
-            <option value="brightness(130%)">明亮</option>
-            <option value="saturate(200%)">高饱和</option>
-            <option value="hue-rotate(90deg)">色相偏移 90°</option>
-            <option value="hue-rotate(180deg)">色相偏移 180°</option>
-            <option value="hue-rotate(270deg)">色相偏移 270°</option>
-            <option value="invert(100%)">反色</option>
-            <option value="blur(3px)">模糊</option>
-            <option value="contrast(200%) grayscale(100%)">黑色电影</option>
-            <option value="saturate(300%) contrast(120%)">鲜艳夺目</option>
-            <option value="sepia(80%) saturate(150%) hue-rotate(330deg)">暖调复古</option>
-            <option value="brightness(110%) contrast(90%) saturate(80%) sepia(20%)">褪色胶片</option>
-            <option value="contrast(120%) brightness(110%) hue-rotate(200deg)">赛博朋克</option>
+            <option value="none">原图（无滤镜）</option><option value="grayscale(100%)" selected>黑白</option><option value="sepia(100%)">复古棕褐</option><option value="contrast(150%)">高对比度</option><option value="brightness(130%)">明亮</option><option value="saturate(200%)">高饱和</option><option value="hue-rotate(90deg)">色相偏移 90°</option><option value="hue-rotate(180deg)">色相偏移 180°</option><option value="hue-rotate(270deg)">色相偏移 270°</option><option value="invert(100%)">反色</option><option value="blur(3px)">模糊</option><option value="contrast(200%) grayscale(100%)">黑色电影</option><option value="saturate(300%) contrast(120%)">鲜艳夺目</option><option value="sepia(80%) saturate(150%) hue-rotate(330deg)">暖调复古</option><option value="brightness(110%) contrast(90%) saturate(80%) sepia(20%)">褪色胶片</option><option value="contrast(120%) brightness(110%) hue-rotate(200deg)">赛博朋克</option>
           </select>
         </div>
       </div>
@@ -365,34 +132,31 @@
     <button class="generate-btn" id="generateBtn">✦ 生成拼接图片</button>
   </div>
 
-  <!-- Results -->
   <div class="results" id="results">
     <div class="card">
-      <h2>🖼️ 生成结果</h2>
+      <h2>🖼️ 生成结果（已中缝补偿）</h2>
       <div class="split-row">
-        <div class="split-item">
-          <canvas id="canvasA"></canvas>
-          <div class="split-label">A · 左图</div>
-        </div>
-        <div class="split-item">
-          <canvas id="canvasB"></canvas>
-          <div class="split-label">B · 右图</div>
-        </div>
+        <div class="split-item"><canvas id="canvasA"></canvas><div class="split-label">A · 左屏图片</div></div>
+        <div class="split-item"><canvas id="canvasB"></canvas><div class="split-label">B · 右屏图片</div></div>
       </div>
     </div>
     <div class="card">
-      <h2>🔗 拼接预览</h2>
-      <div class="combined">
-        <div class="compare-container" id="compareContainer">
-          <canvas id="canvasCombined"></canvas>
-          <div class="compare-slider" id="compareSlider">
-            <div class="compare-handle">⇔</div>
-          </div>
+      <h2>📱 设备模拟预览（含物理间隙）</h2>
+      <div class="device-preview">
+        <div class="device-frame" id="deviceFrame">
+          <div class="device-screen" id="deviceScreenA"><canvas id="deviceCanvasA"></canvas></div>
+          <div class="device-gap" id="deviceGap"></div>
+          <div class="device-screen" id="deviceScreenB"><canvas id="deviceCanvasB"></canvas></div>
         </div>
+        <div class="device-label" id="deviceLabel"></div>
       </div>
+    </div>
+    <div class="card">
+      <h2>🔗 无缝拼接预览</h2>
+      <div class="combined"><canvas id="canvasCombined"></canvas></div>
       <div class="download-row">
-        <button class="dl-btn" onclick="download('A')">⬇ 下载左图</button>
-        <button class="dl-btn" onclick="download('B')">⬇ 下载右图</button>
+        <button class="dl-btn" onclick="download('A')">⬇ 下载左屏图</button>
+        <button class="dl-btn" onclick="download('B')">⬇ 下载右屏图</button>
         <button class="dl-btn" onclick="download('Combined')">⬇ 下载拼接图</button>
       </div>
     </div>
@@ -400,224 +164,190 @@
 </div>
 
 <script>
-// ---- Config ----
-const RATIO = 3 / 4; // width / height
-const FRAME_DISPLAY_H = 400; // px display height of crop frame
-const FRAME_DISPLAY_W = FRAME_DISPLAY_H * RATIO;
-const OUTPUT_H = 2000; // output pixel height
-const OUTPUT_W = OUTPUT_H * RATIO; // 1500
-
-// ---- State ----
+const FRAME_H = 400;
 let loadedImage = null;
-const cropState = {
-  A: { x: 0, y: 0, zoom: 1 },
-  B: { x: 0, y: 0, zoom: 1 }
-};
+const cs = { x: 0, y: 0, zoom: 1, baseScale: 1, frameW: 0, frameH: 0, imgEl: null };
 
-// ---- Upload ----
-const uploadArea = document.getElementById('uploadArea');
-const fileInput = document.getElementById('fileInput');
-uploadArea.addEventListener('click', () => fileInput.click());
-uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-uploadArea.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadArea.classList.remove('dragover');
-  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-});
-fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+function dp() {
+  const sw = parseFloat(document.getElementById('screenWidth').value) || 12;
+  const sh = parseFloat(document.getElementById('screenHeight').value) || 18.5;
+  const gap = parseFloat(document.getElementById('gapSize').value) || 0;
+  const totalW = sw * 2 + gap;
+  return { sw, sh, gap, totalW, gapRatio: gap / totalW, screenRatio: sw / sh };
+}
 
-function handleFile(file) {
-  if (file.size > 20 * 1024 * 1024) { alert('文件太大，最大支持 20MB'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
+function updateInfo() {
+  const p = dp();
+  document.getElementById('settingsInfo').innerHTML =
+    `📊 总视觉宽度: <code>${p.totalW.toFixed(1)}cm</code> | 可显示: <code>${(p.sw*2).toFixed(1)}cm</code> | 补偿比例: <code>${(p.gapRatio*100).toFixed(2)}%</code><br>中缝区域将从原图中心删除 <code>${(p.gapRatio*100).toFixed(2)}%</code> 宽度，确保画面视觉完整`;
+  if (loadedImage) initCrop();
+}
+updateInfo();
+['screenWidth','screenHeight','gapSize'].forEach(id => document.getElementById(id).addEventListener('input', updateInfo));
+
+// Upload
+const ua = document.getElementById('uploadArea'), fi = document.getElementById('fileInput');
+ua.addEventListener('click', () => fi.click());
+ua.addEventListener('dragover', e => { e.preventDefault(); ua.classList.add('dragover'); });
+ua.addEventListener('dragleave', () => ua.classList.remove('dragover'));
+ua.addEventListener('drop', e => { e.preventDefault(); ua.classList.remove('dragover'); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+fi.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+
+function loadFile(file) {
+  if (file.size > 20*1024*1024) { alert('文件太大'); return; }
+  const r = new FileReader();
+  r.onload = e => {
     const img = new Image();
-    img.onload = () => {
-      loadedImage = img;
-      uploadArea.querySelector('.label').textContent = '✅ ' + file.name;
-      initCropFrames();
-    };
+    img.onload = () => { loadedImage = img; ua.querySelector('.label').textContent = '✅ ' + file.name; initCrop(); };
     img.src = e.target.result;
   };
-  reader.readAsDataURL(file);
+  r.readAsDataURL(file);
 }
 
-// ---- Crop Frames ----
-function initCropFrames() {
+// Crop
+function initCrop() {
   document.getElementById('cropSection').style.display = 'block';
-  setupFrame('A');
-  setupFrame('B');
-  // Reset zoom sliders
-  document.getElementById('zoomA').value = 1;
-  document.getElementById('zoomB').value = 1;
-  document.getElementById('zoomAVal').textContent = '100%';
-  document.getElementById('zoomBVal').textContent = '100%';
-  document.getElementById('cropSection').scrollIntoView({ behavior: 'smooth' });
-}
-
-function setupFrame(side) {
-  const frame = document.getElementById('frame' + side);
+  const p = dp();
+  const fW = FRAME_H * (p.totalW / p.sh);
+  const fH = FRAME_H;
+  const frame = document.getElementById('cropFrame');
+  frame.style.width = fW + 'px'; frame.style.height = fH + 'px';
   frame.innerHTML = '';
-  frame.style.width = FRAME_DISPLAY_W + 'px';
-  frame.style.height = FRAME_DISPLAY_H + 'px';
-  frame.style.margin = '0 auto';
-  frame.style.border = side === 'A' ? '2px solid var(--color-a)' : '2px solid var(--color-b)';
+
+  // Gap indicator
+  const gW = (p.gap / p.totalW) * fW;
+  if (gW > 0) {
+    const g = document.createElement('div');
+    g.className = 'gap-indicator';
+    g.style.left = ((fW - gW) / 2) + 'px'; g.style.width = gW + 'px';
+    g.innerHTML = '<span>中缝删除区</span>';
+    frame.appendChild(g);
+  }
+
+  // Screen border indicators
+  const screenDisplayW = (p.sw / p.totalW) * fW;
+  ['left','right'].forEach((side, i) => {
+    const border = document.createElement('div');
+    border.style.cssText = `position:absolute;top:0;bottom:0;width:${screenDisplayW}px;border:1px solid rgba(255,255,255,0.15);pointer-events:none;z-index:5;border-radius:3px;`;
+    border.style[side] = '0';
+    frame.appendChild(border);
+  });
 
   const imgEl = document.createElement('img');
   imgEl.src = loadedImage.src;
-
-  // Fit image: scale so it covers the frame initially
-  const imgW = loadedImage.naturalWidth;
-  const imgH = loadedImage.naturalHeight;
-  const scaleToFit = Math.max(FRAME_DISPLAY_W / imgW, FRAME_DISPLAY_H / imgH);
-
-  const state = cropState[side];
-  state.zoom = 1;
-  state.baseScale = scaleToFit;
-  state.x = (FRAME_DISPLAY_W - imgW * scaleToFit) / 2;
-  state.y = (FRAME_DISPLAY_H - imgH * scaleToFit) / 2;
-
-  applyTransform(imgEl, state);
+  const scaleToFit = Math.max(fW / loadedImage.naturalWidth, fH / loadedImage.naturalHeight);
+  cs.baseScale = scaleToFit; cs.zoom = 1;
+  cs.x = (fW - loadedImage.naturalWidth * scaleToFit) / 2;
+  cs.y = (fH - loadedImage.naturalHeight * scaleToFit) / 2;
+  cs.frameW = fW; cs.frameH = fH; cs.imgEl = imgEl;
+  applyT();
   frame.appendChild(imgEl);
 
-  // Drag
-  let dragging = false, startX, startY, startPosX, startPosY;
+  document.getElementById('zoomSlider').value = 1;
+  document.getElementById('zoomVal').textContent = '100%';
 
-  const onDown = (cx, cy) => {
-    dragging = true;
-    startX = cx;
-    startY = cy;
-    startPosX = state.x;
-    startPosY = state.y;
-  };
-  const onMove = (cx, cy) => {
-    if (!dragging) return;
-    state.x = startPosX + (cx - startX);
-    state.y = startPosY + (cy - startY);
-    applyTransform(imgEl, state);
-  };
-  const onUp = () => { dragging = false; };
+  let dragging = false, sx, sy, spx, spy;
+  frame.onmousedown = e => { e.preventDefault(); dragging = true; sx = e.clientX; sy = e.clientY; spx = cs.x; spy = cs.y; };
+  document.onmousemove = e => { if (!dragging) return; cs.x = spx + e.clientX - sx; cs.y = spy + e.clientY - sy; applyT(); };
+  document.onmouseup = () => dragging = false;
+  frame.ontouchstart = e => { e.preventDefault(); dragging = true; sx = e.touches[0].clientX; sy = e.touches[0].clientY; spx = cs.x; spy = cs.y; };
+  document.ontouchmove = e => { if (!dragging) return; cs.x = spx + e.touches[0].clientX - sx; cs.y = spy + e.touches[0].clientY - sy; applyT(); };
+  document.ontouchend = () => dragging = false;
 
-  frame.addEventListener('mousedown', e => { e.preventDefault(); onDown(e.clientX, e.clientY); });
-  window.addEventListener('mousemove', e => { if (dragging) onMove(e.clientX, e.clientY); });
-  window.addEventListener('mouseup', onUp);
-  frame.addEventListener('touchstart', e => { e.preventDefault(); onDown(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
-  window.addEventListener('touchmove', e => { if (dragging) onMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
-  window.addEventListener('touchend', onUp);
-
-  // Mouse wheel zoom
-  frame.addEventListener('wheel', e => {
+  frame.onwheel = e => {
     e.preventDefault();
-    const slider = document.getElementById('zoom' + side);
-    let newZoom = state.zoom + (e.deltaY < 0 ? 0.1 : -0.1);
-    newZoom = Math.max(0.2, Math.min(3, newZoom));
-    state.zoom = newZoom;
-    slider.value = newZoom;
-    document.getElementById('zoom' + side + 'Val').textContent = Math.round(newZoom * 100) + '%';
-    applyTransform(imgEl, state);
-  }, { passive: false });
+    cs.zoom = Math.max(0.2, Math.min(3, cs.zoom + (e.deltaY < 0 ? 0.1 : -0.1)));
+    document.getElementById('zoomSlider').value = cs.zoom;
+    document.getElementById('zoomVal').textContent = Math.round(cs.zoom * 100) + '%';
+    applyT();
+  };
 
-  // Zoom slider
-  const slider = document.getElementById('zoom' + side);
-  slider.addEventListener('input', () => {
-    state.zoom = parseFloat(slider.value);
-    document.getElementById('zoom' + side + 'Val').textContent = Math.round(state.zoom * 100) + '%';
-    applyTransform(imgEl, state);
-  });
+  document.getElementById('cropSection').scrollIntoView({ behavior: 'smooth' });
 }
 
-function applyTransform(imgEl, state) {
-  const s = state.baseScale * state.zoom;
-  const w = loadedImage.naturalWidth * s;
-  const h = loadedImage.naturalHeight * s;
-  imgEl.style.width = w + 'px';
-  imgEl.style.height = h + 'px';
-  imgEl.style.left = state.x + 'px';
-  imgEl.style.top = state.y + 'px';
+document.getElementById('zoomSlider').addEventListener('input', function() {
+  cs.zoom = parseFloat(this.value);
+  document.getElementById('zoomVal').textContent = Math.round(cs.zoom * 100) + '%';
+  applyT();
+});
+
+function applyT() {
+  if (!cs.imgEl) return;
+  const s = cs.baseScale * cs.zoom;
+  cs.imgEl.style.width = (loadedImage.naturalWidth * s) + 'px';
+  cs.imgEl.style.height = (loadedImage.naturalHeight * s) + 'px';
+  cs.imgEl.style.left = cs.x + 'px';
+  cs.imgEl.style.top = cs.y + 'px';
 }
 
-// ---- Generate ----
-document.getElementById('generateBtn').addEventListener('click', generate);
-
-function generate() {
+// Generate
+document.getElementById('generateBtn').addEventListener('click', () => {
   if (!loadedImage) return;
-  const img = loadedImage;
+  const p = dp();
+  const s = cs.baseScale * cs.zoom;
+  const srcX = -cs.x / s;
+  const srcY = -cs.y / s;
+  const srcTotalW = cs.frameW / s;
+  const srcTotalH = cs.frameH / s;
+  const gapSrcW = srcTotalW * p.gapRatio;
+  const screenSrcW = (srcTotalW - gapSrcW) / 2;
+
+  const outH = 2000;
+  const outW = Math.round(outH * p.screenRatio);
   const styleA = document.getElementById('styleA').value;
   const styleB = document.getElementById('styleB').value;
 
-  renderCrop('A', styleA, document.getElementById('canvasA'));
-  renderCrop('B', styleB, document.getElementById('canvasB'));
+  // Canvas A - left screen
+  const cA = document.getElementById('canvasA');
+  cA.width = outW; cA.height = outH;
+  const ctxA = cA.getContext('2d');
+  if (styleA !== 'none') ctxA.filter = styleA;
+  ctxA.drawImage(loadedImage, srcX, srcY, screenSrcW, srcTotalH, 0, 0, outW, outH);
 
-  // Combined: A left + B right
+  // Canvas B - right screen (skip gap)
+  const cB = document.getElementById('canvasB');
+  cB.width = outW; cB.height = outH;
+  const ctxB = cB.getContext('2d');
+  if (styleB !== 'none') ctxB.filter = styleB;
+  ctxB.drawImage(loadedImage, srcX + screenSrcW + gapSrcW, srcY, screenSrcW, srcTotalH, 0, 0, outW, outH);
+
+  // Device preview
+  const previewH = 300;
+  const previewScreenW = Math.round(previewH * p.screenRatio);
+  const previewGapW = Math.round(previewScreenW * (p.gap / p.sw));
+
+  const dA = document.getElementById('deviceCanvasA');
+  dA.width = outW; dA.height = outH;
+  dA.getContext('2d').drawImage(cA, 0, 0);
+  dA.style.width = previewScreenW + 'px'; dA.style.height = previewH + 'px';
+
+  const dB = document.getElementById('deviceCanvasB');
+  dB.width = outW; dB.height = outH;
+  dB.getContext('2d').drawImage(cB, 0, 0);
+  dB.style.width = previewScreenW + 'px'; dB.style.height = previewH + 'px';
+
+  document.getElementById('deviceGap').style.width = previewGapW + 'px';
+  document.getElementById('deviceLabel').textContent =
+    `模拟效果：${p.sw}cm + ${p.gap}cm间隙 + ${p.sw}cm | 补偿删除 ${(p.gapRatio*100).toFixed(2)}% 中心区域`;
+
+  // Combined (no gap, A+B side by side)
   const cC = document.getElementById('canvasCombined');
-  cC.width = OUTPUT_W * 2;
-  cC.height = OUTPUT_H;
+  cC.width = outW * 2; cC.height = outH;
   const ctxC = cC.getContext('2d');
-  ctxC.drawImage(document.getElementById('canvasA'), 0, 0);
-  ctxC.drawImage(document.getElementById('canvasB'), OUTPUT_W, 0);
+  ctxC.drawImage(cA, 0, 0);
+  ctxC.drawImage(cB, outW, 0);
 
   document.getElementById('results').style.display = 'block';
   document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
-  initCompareSlider();
-}
+});
 
-function renderCrop(side, style, canvas) {
-  const state = cropState[side];
-  const img = loadedImage;
-
-  // Map display coords to source image coords
-  const displayScale = state.baseScale * state.zoom;
-  // In display: image pixel (ix, iy) appears at (state.x + ix * displayScale, state.y + iy * displayScale)
-  // The frame shows [0, FRAME_DISPLAY_W] x [0, FRAME_DISPLAY_H]
-  // So source x for frame left edge: (0 - state.x) / displayScale
-  const srcX = (0 - state.x) / displayScale;
-  const srcY = (0 - state.y) / displayScale;
-  const srcW = FRAME_DISPLAY_W / displayScale;
-  const srcH = FRAME_DISPLAY_H / displayScale;
-
-  canvas.width = OUTPUT_W;
-  canvas.height = OUTPUT_H;
-  const ctx = canvas.getContext('2d');
-  if (style !== 'none') ctx.filter = style;
-  ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, OUTPUT_W, OUTPUT_H);
-}
-
-// ---- Compare Slider ----
-function initCompareSlider() {
-  const container = document.getElementById('compareContainer');
-  const slider = document.getElementById('compareSlider');
-  const canvas = document.getElementById('canvasCombined');
-  let dragging = false;
-
-  function setPos(x) {
-    const rect = container.getBoundingClientRect();
-    let ratio = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
-    slider.style.left = (ratio * 100) + '%';
-  }
-
-  container.addEventListener('mousedown', e => { dragging = true; setPos(e.clientX); });
-  window.addEventListener('mousemove', e => { if (dragging) setPos(e.clientX); });
-  window.addEventListener('mouseup', () => dragging = false);
-  container.addEventListener('touchstart', e => { dragging = true; setPos(e.touches[0].clientX); }, { passive: true });
-  window.addEventListener('touchmove', e => { if (dragging) setPos(e.touches[0].clientX); }, { passive: true });
-  window.addEventListener('touchend', () => dragging = false);
-
-  setTimeout(() => {
-    const rect = container.getBoundingClientRect();
-    setPos(rect.left + rect.width / 2);
-  }, 100);
-}
-
-// ---- Download ----
+// Download
 function download(type) {
-  let canvas;
-  if (type === 'A') canvas = document.getElementById('canvasA');
-  else if (type === 'B') canvas = document.getElementById('canvasB');
-  else canvas = document.getElementById('canvasCombined');
-  const link = document.createElement('a');
-  link.download = 'splitstyle-' + type.toLowerCase() + '.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+  const c = type === 'A' ? document.getElementById('canvasA') : type === 'B' ? document.getElementById('canvasB') : document.getElementById('canvasCombined');
+  const a = document.createElement('a');
+  a.download = 'splitstyle-' + type.toLowerCase() + '.png';
+  a.href = c.toDataURL('image/png');
+  a.click();
 }
 </script>
 </body>
